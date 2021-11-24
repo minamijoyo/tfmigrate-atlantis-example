@@ -1,0 +1,4 @@
+# https://ngrok.com/docs#config-options
+#
+# Bind any for calling ngrok API from Docker network.
+web_addr: 0.0.0.0:4040

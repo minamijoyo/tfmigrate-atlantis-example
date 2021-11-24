@@ -1,0 +1,61 @@
+user  nginx;
+worker_processes  auto;
+
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    server_tokens off;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       8080;
+        root         /usr/share/nginx/html;
+
+        set_real_ip_from        ${LOCAL_NETWORK};
+        real_ip_header          X-Forwarded-For;
+
+        # Allow access `/events` endpoint to GitHub webhook (IPv4)
+        # https://docs.github.com/en/github/authenticating-to-github/about-githubs-ip-addresses
+        # $ curl -sSL https://api.github.com/meta | jq .hooks | grep -v ':'
+        location = /events {
+            allow 192.30.252.0/22;
+            allow 185.199.108.0/22;
+            allow 140.82.112.0/20;
+            allow 143.55.64.0/20;
+            deny all;
+
+            proxy_pass http://${UPSTREAM_HOST}:4141;
+        }
+
+        # Allow access `/healthz` endpoint to local network
+        location = /healthz {
+            allow ${LOCAL_NETWORK};
+            deny all;
+
+            proxy_pass http://${UPSTREAM_HOST}:4141;
+        }
+
+        # Allow access other endpoints to client network
+        location / {
+            allow ${CLIENT_NETWORK};
+            deny all;
+
+            proxy_pass http://${UPSTREAM_HOST}:4141;
+        }
+    }
+}

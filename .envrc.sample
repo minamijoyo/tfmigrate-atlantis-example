@@ -1,0 +1,36 @@
+#
+# For atlantis (required)
+# https://www.runatlantis.io/docs/server-configuration.html#flags
+#
+
+# A GitHub username for atlantis. (eg. minamijoyo)
+export ATLANTIS_GH_USER=xxxx
+
+# A GitHub token (repo scope) for atlantis.
+export ATLANTIS_GH_TOKEN=xxxx
+
+# A secret used to validate GitHub webhooks.
+export ATLANTIS_GH_WEBHOOK_SECRET=xxxx
+
+# Atlantis requires you to specify an allowlist of repositories it will accept webhooks from.
+# (eg. github.com/minamijoyo/atlantis-dev)
+export ATLANTIS_REPO_ALLOWLIST=xxxx
+
+#
+# For nginx (required)
+#
+
+# For set_real_ip_from in nginx, set IP range for Docker network. (eg. 192.168.252.0/24)
+export DOCKER_NETWORK=xxxx
+
+#
+# For update_webhook (optional)
+# With The ngrok free plan, the URL cannot be fixed and changes every time.
+# The update_webhook script gets the ngrok public_url and sets it to GitHub Webhook via API.
+#
+
+# A repository to be updated webhook. (eg. minamijoyo/atlantis-dev)
+export DEV_REPO=xxxx
+
+# A GitHub Token (admin:repo_hook scope) for update webhoook
+export ADMIN_GH_TOKEN=xxxx

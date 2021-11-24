@@ -1,0 +1,73 @@
+# https://www.runatlantis.io/docs/server-side-repo-config.html
+repos:
+# id can either be an exact repo ID or a regex.
+# If using a regex, it must start and end with a slash.
+# Repo ID's are of the form {VCS hostname}/{org}/{repo name}, ex.
+# github.com/runatlantis/atlantis.
+- id: /.*/
+
+  # branch is an regex matching pull requests by base branch
+  # (the branch the pull request is getting merged into).
+  # By default, all branches are matched
+  branch: /^master$/
+
+  # apply_requirements sets the Apply Requirements for all repos that match.
+  # Disable apply_requirements for easy testing.
+  # apply_requirements: [approved, mergeable]
+
+  # allowed_overrides specifies which keys can be overridden by this repo in
+  # its atlantis.yaml file.
+  allowed_overrides: [workflow]
+
+  # allowed_workflows specifies which workflows the repos that match
+  # are allowed to select.
+  allowed_workflows: [tfmigrate]
+
+  # allow_custom_workflows defines whether this repo can define its own
+  # workflows. If false (default), the repo can only use server-side defined
+  # workflows.
+  allow_custom_workflows: false
+
+  # pre_workflow_hooks defines arbitrary list of scripts to execute before workflow execution.
+  # https://www.runatlantis.io/docs/pre-workflow-hooks.html
+  pre_workflow_hooks:
+    - run: pre_workflow_hooks.sh
+
+# workflows lists server-side custom workflows
+# https://www.runatlantis.io/docs/custom-workflows.html
+workflows:
+  tfmigrate:
+    plan:
+      steps:
+        # Switch terraform version.
+        # This example assumes all affected directories use the same version.
+        # If you want to use a different version for each directory,
+        # set it dynamically with a wrapper script and direnv.
+        - env:
+            # `TFMIGRATE_EXEC_PATH` is a string how terraform command is executed. Default to `terraform`.
+            # https://github.com/minamijoyo/tfmigrate#environment-variables
+            name: TFMIGRATE_EXEC_PATH
+            # `$ATLANTIS_TERRAFORM_VERSION` is the version of Terraform used for this project.
+            # https://www.runatlantis.io/docs/custom-workflows.html#reference
+            # Note that the `tfmigrate` workflow runs at `tfmigrate/` directory,
+            # this means that the value of `ATLANTIS_TERRAFORM_VERSION` is detected in `tfmigrate/`.
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        # Run tfmigrate plan at repository root and generate a dummy plan file.
+        # This example assumes history mode. If you are not using history mode,
+        # you need to detect a new migration file from pull request metadata by yourself.
+        # https://github.com/minamijoyo/tfmigrate#history-block
+        #
+        # At apply step, atlantis detects projects to be applied by finding plan files,
+        # so we need a dummy plan file.
+        #
+        # `$PLANFILE` is an absolute path to the location where Atlantis expects
+        # the plan to either be generated (by plan) or already exist (if running apply).
+        # https://www.runatlantis.io/docs/custom-workflows.html#reference
+        - run: cd $(git rev-parse --show-toplevel) && tfmigrate plan && touch $PLANFILE
+    apply:
+      steps:
+        - env:
+            name: TFMIGRATE_EXEC_PATH
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        # Run tfmigrate apply at repository root
+        - run: cd $(git rev-parse --show-toplevel) && tfmigrate apply

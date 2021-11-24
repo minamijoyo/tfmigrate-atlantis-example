@@ -1,0 +1,76 @@
+services:
+  update_webhook:
+    build:
+      context: ./update_webhook
+    depends_on:
+      - ngrok
+    environment:
+      ADMIN_GH_TOKEN: "${ADMIN_GH_TOKEN}"
+      DEV_REPO: "${DEV_REPO}"
+  ngrok:
+    build:
+      context: ./ngrok
+    ports:
+      - 4040:4040
+    depends_on:
+      - nginx
+    command: ngrok http nginx:8080 --log stdout --log-level info
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - 8080:8080
+    depends_on:
+      - atlantis
+    environment:
+      UPSTREAM_HOST: "atlantis"
+      # For set_real_ip_from, set IP range for Docker network
+      LOCAL_NETWORK: "${DOCKER_NETWORK}"
+      # For allow access to Web UI, set IP range for Docker network
+      CLIENT_NETWORK: "${DOCKER_NETWORK}"
+  atlantis:
+    build:
+      context: ./atlantis
+    ports:
+      - 4141:4141
+    depends_on:
+      - localstack
+    volumes:
+      - atlantis-data:/var/lib/atlantis
+      - ./atlantis:/etc/atlantis
+    command: server --config /etc/atlantis/config.yaml
+    environment:
+      ATLANTIS_ATLANTIS_URL: "http://127.0.0.1:8080"
+      ATLANTIS_GH_USER: "${ATLANTIS_GH_USER}"
+      ATLANTIS_GH_TOKEN: "${ATLANTIS_GH_TOKEN}"
+      ATLANTIS_GH_WEBHOOK_SECRET: "${ATLANTIS_GH_WEBHOOK_SECRET}"
+      ATLANTIS_REPO_ALLOWLIST: "${ATLANTIS_REPO_ALLOWLIST}"
+      ATLANTIS_LOG_LEVEL: "debug"
+      AWS_S3_ENDPOINT: "http://localstack:4566"
+
+  localstack:
+    image: localstack/localstack
+    # Override ports in docker-compose.override.yml
+    # ports:
+    # - "4566:4566"
+    environment:
+      # DEBUG: "true"
+      SERVICES: "s3"
+      DEFAULT_REGION: "ap-northeast-1"
+      S3_BUCKET: "tfstate-test"
+    volumes:
+      # initialize scripts on startup
+      - ./localstack:/docker-entrypoint-initaws.d
+
+volumes:
+  atlantis-data:
+    driver: local
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        # For set_real_ip_from in nginx, set IP range for Docker network
+        - subnet: "${DOCKER_NETWORK}"

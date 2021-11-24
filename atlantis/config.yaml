@@ -1,0 +1,12 @@
+# https://www.runatlantis.io/docs/server-configuration.html
+
+# Directory where Atlantis will store its data.
+data-dir: /var/lib/atlantis
+
+# Automatically merge pull requests after all plans have been successfully applied.
+# Defaults to false.
+# Disable automerge for easy repeatable testing.
+automerge: false
+
+# Path to a YAML server-side repo config file.
+repo-config: /etc/atlantis/repos.yaml
