@@ -4,7 +4,7 @@ FROM runatlantis/atlantis:v0.17.5
 RUN apk add --no-cache jq
 
 # Install tfmigrate
-ENV TFMIGRATE_VERSION 0.2.11
+ENV TFMIGRATE_VERSION 0.2.13
 RUN curl -fsSL https://github.com/minamijoyo/tfmigrate/releases/download/v${TFMIGRATE_VERSION}/tfmigrate_${TFMIGRATE_VERSION}_linux_amd64.tar.gz \
   | tar -xzC /usr/local/bin && chmod +x /usr/local/bin/tfmigrate
 
