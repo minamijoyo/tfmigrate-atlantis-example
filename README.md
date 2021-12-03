@@ -7,3 +7,5 @@ This repository contains all configurations for running atlantis in local with d
 3. Generate an atlantis.yaml for tfmigrate dynamically in pre workflow hooks. ([atlantis/hooks/pre_workflow_hooks.sh](atlantis/hooks/pre_workflow_hooks.sh))
 
 See [atlantis/](atlantis/) directory for more detail.
+
+A demo for tfmigrate with Atlantis is also available at: [minamijoyo/tfmigrate-atlantis-demo](https://github.com/minamijoyo/tfmigrate-atlantis-demo)
