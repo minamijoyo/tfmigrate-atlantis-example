@@ -13,7 +13,7 @@ export ATLANTIS_GH_TOKEN=xxxx
 export ATLANTIS_GH_WEBHOOK_SECRET=xxxx
 
 # Atlantis requires you to specify an allowlist of repositories it will accept webhooks from.
-# (eg. github.com/minamijoyo/atlantis-dev)
+# (eg. github.com/minamijoyo/tfmigrate-atlantis-demo)
 export ATLANTIS_REPO_ALLOWLIST=xxxx
 
 #
@@ -29,7 +29,7 @@ export DOCKER_NETWORK=xxxx
 # The update_webhook script gets the ngrok public_url and sets it to GitHub Webhook via API.
 #
 
-# A repository to be updated webhook. (eg. minamijoyo/atlantis-dev)
+# A repository to be updated webhook. (eg. minamijoyo/tfmigrate-atlantis-demo)
 export DEV_REPO=xxxx
 
 # A GitHub Token (admin:repo_hook scope) for update webhoook
