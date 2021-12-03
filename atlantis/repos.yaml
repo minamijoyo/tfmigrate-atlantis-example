@@ -40,22 +40,22 @@ workflows:
     plan:
       steps:
         # Switch terraform version.
-        # This example assumes all affected directories use the same version.
-        # If you want to use a different version for each directory,
-        # set it dynamically with a wrapper script and direnv.
         - env:
             # `TFMIGRATE_EXEC_PATH` is a string how terraform command is executed. Default to `terraform`.
             # https://github.com/minamijoyo/tfmigrate#environment-variables
             name: TFMIGRATE_EXEC_PATH
             # `$ATLANTIS_TERRAFORM_VERSION` is the version of Terraform used for this project.
             # https://www.runatlantis.io/docs/custom-workflows.html#reference
-            # Note that the `tfmigrate` workflow runs at `tfmigrate/` directory,
-            # this means that the value of `ATLANTIS_TERRAFORM_VERSION` is detected in `tfmigrate/`.
+            # Note that the `tfmigrate` workflow runs at a migration file directory.
+            # This example assumes all affected directories use the same version.
+            # If you want to use a different version for each directory,
+            # set version dynamically with a wrapper script.
             command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
-        # Run tfmigrate plan at repository root and generate a dummy plan file.
-        # This example assumes history mode. If you are not using history mode,
-        # you need to detect a new migration file from pull request metadata by yourself.
+        # Run `tfmigrate plan` at repository root and generate a dummy plan file.
+        # This example assumes history mode.
         # https://github.com/minamijoyo/tfmigrate#history-block
+        # If you are not using history mode, you need to detect a new migration file
+        # from pull request metadata by yourself.
         #
         # At apply step, atlantis detects projects to be applied by finding plan files,
         # so we need a dummy plan file.
@@ -69,5 +69,5 @@ workflows:
         - env:
             name: TFMIGRATE_EXEC_PATH
             command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
-        # Run tfmigrate apply at repository root
+        # Run `tfmigrate apply` at repository root
         - run: cd $(git rev-parse --show-toplevel) && tfmigrate apply
